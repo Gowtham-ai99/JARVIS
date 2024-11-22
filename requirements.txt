@@ -1,0 +1,1 @@
+pip install NetHyTech-STT TTS_B pywhatkit psutil winotify web-browser 
