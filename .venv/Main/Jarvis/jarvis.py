@@ -26,5 +26,6 @@ def main():
         
 
 main()
+print ("Jarvis is ready sir!")
 
 
