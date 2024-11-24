@@ -1,6 +1,7 @@
 import os
 import re
-import pytesseract
+
+import pytesseract  # Tesseract-OCR library
 from PIL import Image
 from openpyxl import Workbook
 

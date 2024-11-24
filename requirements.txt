@@ -1,1 +1,1 @@
-pip install NetHyTech-STT TTS_B pywhatkit psutil winotify web-browser 
+pip install NetHyTech-STT TTS_B pywhatkit psutil winotify web-browser pytesseract openpyxl
