@@ -66,13 +66,13 @@ def perform_browser_action(text):
         open_history()
     elif "open bookmarks" in text:
         open_bookmarks()
-    elif "go back" in text :
+    elif "back" in text :
         go_back()
-    elif "go forward" in text :
+    elif "forward" in text :
         go_forward()
     elif "open dev tools" in text :
         open_dev_tools()
-    elif "toggle full screen" in text :
+    elif "full screen" in text :
         toggle_full_screen()
     elif "open private window" in text :
         open_private_window()
