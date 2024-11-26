@@ -5,6 +5,8 @@ from Automation.Play_Music_YT import play_music_on_YT
 from TTS_B import speak
 import pyautogui
 import time
+from Automation.tab_automation import perform_browser_action
+from Automation.scroll_system import perform_scroll_action
 def close():
     pyautogui.hotkey('alt','f4')
 
@@ -52,6 +54,11 @@ def automation_Brain(text):
         close_tabs()
         speak("sucessfully Closed tab Sir")
         return "Closing..."
+    else:
+        perform_browser_action(text)
+        perform_scroll_action(text)
+        
+
    # elif "close" in text :
        # close()
        # speak("successfully closed application  Sir")
