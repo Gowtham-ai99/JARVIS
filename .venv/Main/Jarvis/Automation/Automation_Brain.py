@@ -50,10 +50,6 @@ def automation_Brain(text):
             play_music_on_YT(text)
         else:
             play_music_on_YT(text)
-    elif "close" and "tab" in text:
-        close_tabs()
-        speak("sucessfully Closed tab Sir")
-        return "Closing..."
     else:
         perform_browser_action(text)
         perform_scroll_action(text)
