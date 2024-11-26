@@ -1,61 +1,71 @@
 import os
 import re
-
-import pytesseract  # Tesseract-OCR library
+import pytesseract
 from PIL import Image
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 
-# Tesseract-OCR setup
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+# Path to Tesseract OCR executable
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
-# Path to WhatsApp Media folder
-whatsapp_media_folder = r"C:\Path\to\WhatsApp\Media\WhatsApp Images"
+# Directory containing payment screenshots
+image_folder = "C:\\Users\\User\\Downloads\\New folder"
 
-# Initialize workbook
-wb = Workbook()
-ws = wb.active
-ws.append(["Transaction ID", "Amount (Rs)", "Date", "Time", "File Name"])
-
-def extract_payment_data(image_path):
-    """Extract payment data (Transaction ID, Amount, Date, Time) from an image."""
-    try:
-        image = Image.open(image_path)
-        raw_text = pytesseract.image_to_string(image)
-
-        # Extract patterns
-        transaction_id = re.search(r"Transaction ID[:\-]?\s*(\d+)", raw_text)
-        amount = re.search(r"Paid Rs\.?\s*(\d+\.\d+)", raw_text)
-        date = re.search(r"Date[:\-]?\s*([\d\w\s]+)", raw_text)
-        time = re.search(r"Time[:\-]?\s*([\d:\s\w]+)", raw_text)
-
-        return {
-            "transaction_id": transaction_id.group(1) if transaction_id else "Not found",
-            "amount": amount.group(1) if amount else "Not found",
-            "date": date.group(1) if date else "Not found",
-            "time": time.group(1) if time else "Not found",
-        }
-    except Exception as e:
-        print(f"Error processing {image_path}: {e}")
-        return None
-
-# Process images in the WhatsApp Media folder
-for filename in os.listdir(whatsapp_media_folder):
-    if filename.lower().endswith((".jpg", ".png", ".jpeg")):
-        file_path = os.path.join(whatsapp_media_folder, filename)
-
-        # Extract payment data
-        payment_data = extract_payment_data(file_path)
-        if payment_data and payment_data["transaction_id"] != "Not found":
-            # Append data to Excel if it's a payment screenshot
-            ws.append([
-                payment_data["transaction_id"],
-                payment_data["amount"],
-                payment_data["date"],
-                payment_data["time"],
-                filename,
-            ])
-
-# Save the workbook
+# Excel file to save data
 output_file = "WhatsApp_Payment_Data.xlsx"
+
+# Check if Excel file exists, else create one
+if not os.path.exists(output_file):
+    wb = Workbook()
+    sheet = wb.active
+    # Create headers
+    sheet.append(["Transaction ID", "Amount (Rs)", "Date", "Time", "File Name"])
+    wb.save(output_file)
+
+# Load existing workbook
+wb = load_workbook(output_file)
+sheet = wb.active
+
+# Function to extract details using OCR and regex
+def extract_details(image_path):
+    # Open image and apply OCR
+    image = Image.open(image_path)
+    text = pytesseract.image_to_string(image)
+
+    # Extract Transaction ID (ensure it captures IDs like T2411240906356702517376)
+    transaction_id = re.search(r"T\d{18}", text)
+    transaction_id = transaction_id.group() if transaction_id else "N/A"
+    print (transaction_id)
+
+    amount = re.search(r"\b\d{1,3}(,\d{3})*(\.\d{1,2})?\b", text)  # Matches amounts with commas and optional decimals
+    if amount:
+        amount = amount.group().replace(",", "")  # Remove commas for proper numeric handling
+    else:
+        amount = "N/A"
+    print (amount)
+
+
+    # Extract Date
+    date = re.search(r"\d{1,2} \w{3} \d{4}", text)
+    date = date.group() if date else "N/A"
+    print (date)
+
+    # Extract Time
+    time = re.search(r"\d{1,2}:\d{2} (AM|PM|am|pm)", text)
+    time = time.group().upper() if time else "N/A"
+    print (time)
+
+    # Extract File Name
+    file_name = os.path.basename(image_path)
+
+    return [transaction_id, amount, date, time, file_name]
+
+# Process all images in the folder
+for file_name in os.listdir(image_folder):
+    if file_name.lower().endswith((".png", ".jpg", ".jpeg")):
+        image_path = os.path.join(image_folder, file_name)
+        details = extract_details(image_path)
+        sheet.append(details)
+
+# Save to Excel
 wb.save(output_file)
-print(f"Data saved to {output_file}")
+print("Data saved to", output_file)
